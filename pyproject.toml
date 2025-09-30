@@ -4,4 +4,4 @@ version = "0.1.0"
 description = "Fetch live data - clean/transform - model - automate retraining - Monitoring - if drift retraining"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = {file = ["requirements.txt"]}
