@@ -1,14 +1,21 @@
 # ingest the data from yfinance to google cloud bucket
 import datetime
 import time
-from dotenv import load_dotenv
+import sys
+from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+
 import pandas as pd
 from google.cloud import storage
 from google.api_core import exceptions as gcp_exceptions
 import yfinance as yf
+
+from config.settings import load_config, load_settings
 from logging_handler import GLOBAL_LOGGER as log 
 from exception_handler.custom_exceptions import *
+
 
 # =========================================================================
 # #step 1: load the data into dataframe
@@ -61,25 +68,42 @@ from exception_handler.custom_exceptions import *
 
 # make a pipeline where data is getting loaded every month to the gcs bucket 
 class StockDataIngestionPipeline:
-    def __init__(self, tickers):
+    def __init__(self, tickers = None):
 
         log.info("Initializing StockDataIngestionPipeline")
+        load_dotenv()
 
+        self.bucket_name = os.getenv('BUCKET_NAME')
         self._load_configuration()
         self._initialize_gcs_client()
+        
+        self.tickers = tickers
 
         log.info("Pipeline initialization completed successfully")
 
     def _load_configuration(self):
         try:
-            pass
+            self.config = load_config()
+            
+            self.settings = load_settings()
+            #  Log key configurations
+            log.info(f"Data Source: {self.config.data_source.provider}")
+            log.info(f"Period: {self.config.data_source.period}, Interval: {self.config.data_source.interval}")
+            log.info(f"Total tickers: {len(self.config.tickers.get_all_tickers())}")
+            log.info(f"GCS Bucket: {self.settings.bucket_name}")
+
             log.info(f"Configuration loaded successfully. Bucket: {self.bucket_name}")
-        except Exception as e:
-            log.error(f"Error loading configuration: {e}")
+        except FileNotFoundError as e:
+            log.error(f"Configuration file not found: {str(e)}")
             raise ConfigurationError(
-                f"Failed to load configuration{e}", 
-                details="Ensure .env file exists and contains BUCKET_NAME"
-                )
+                "Configuration file not found",
+                details="Ensure config.yaml exists in config/ directory"
+            )
+        except Exception as e:
+            log.error(f"Failed to load configuration: {str(e)}")
+            raise ConfigurationError(
+                f"Configuration loading failed: {str(e)}"
+            )
     
     def _initialize_gcs_client(self):
         try:
@@ -216,6 +240,9 @@ class StockDataIngestionPipeline:
             # step 1: load and process data
             df = self.load_and_process_data(ticker_symbol)
 
+            # validate
+            self._validate_data(df, ticker_symbol)
+
             # step 2: upload to gcs
             blob_path = self.upload_to_gcs(df, ticker_symbol)
             
@@ -225,18 +252,18 @@ class StockDataIngestionPipeline:
             log.error(f"Error processing {ticker_symbol}: {str(e)}")
             return False
 
-        #     # Retry logic
-        #     if retry < self.config.pipeline.retry_attempts - 1:
-        #         log.info(f"Retrying {ticker_symbol} in {self.config.pipeline.retry_delay} seconds...")
-        #         time.sleep(self.config.pipeline.retry_delay)
-        #         return self.process_ticker(ticker_symbol, retry + 1)
-        #     else:
-        #         log.error(f"Failed to process {ticker_symbol} after {self.config.pipeline.retry_attempts} attempts")
-        #         return False
+            # Retry logic
+            if retry < self.config.pipeline.retry_attempts - 1:
+                log.info(f"Retrying {ticker_symbol} in {self.config.pipeline.retry_delay} seconds...")
+                time.sleep(self.config.pipeline.retry_delay)
+                return self.process_ticker(ticker_symbol, retry + 1)
+            else:
+                log.error(f"Failed to process {ticker_symbol} after {self.config.pipeline.retry_attempts} attempts")
+                return False
             
-        # except Exception as e:
-        #     log.error(f"Unexpected error processing {ticker_symbol}: {str(e)}")
-        #     return False
+        except Exception as e:
+            log.error(f"Unexpected error processing {ticker_symbol}: {str(e)}")
+            return False
 
     def run(self, ticker_list: list = None):
         log.info("Starting Stock Data Ingestion Pipeline")

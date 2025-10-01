@@ -1,5 +1,15 @@
+from src.data_ingestion import StockDataIngestionPipeline
+
 def main():
     print("Hello from automated-stockmarket-datapipeline!")
+    pipeline = StockDataIngestionPipeline()
+    
+    # Run for all configured tickers
+    ticker = ['TSLA']
+    pipeline.run(ticker_list = ticker)
+
+
+
 
 
 if __name__ == "__main__":
