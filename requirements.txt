@@ -1,7 +1,9 @@
 ipykernel==6.30.1
 yfinance==0.2.66
-google-cloud-storage 
-dotenv
-pandas
-structlog
-yaml
+google-cloud-storage
+python-dotenv==1.1.1
+pandas==2.3.3
+structlog==25.4.0
+pyyaml==6.0.3
+pydantic==2.11.9
+pydantic-settings==2.11.0
