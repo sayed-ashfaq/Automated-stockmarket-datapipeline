@@ -16,57 +16,6 @@ from config.settings import load_config, load_settings
 from logging_handler import GLOBAL_LOGGER as log 
 from exception_handler.custom_exceptions import *
 
-
-# =========================================================================
-# #step 1: load the data into dataframe
-# US_tickers=  ['TSLA', 'META', 'NVDA', 'PLTR', 'INTC']
-# indian_tickers = ['TATAMOTORS.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS']
-
-
-
-# # step 2: upload the df into cloud storage service
-
-# load_dotenv()   
-
-# client = storage.Client()
-# export_bucket = client.get_bucket(os.getenv('BUCKET_NAME')) 
-
-# def load_and_process_raw_data(ticker_symbol, period, interval):
-#     df= yf.download(ticker_symbol, period=period, interval=interval)    
-#     df.columns = df.columns.get_level_values(0)
-#     df.reset_index(inplace=True)
-#     return df
-
-# def upload_to_gcs(df, ticker_symbol):
-#     # create a blob object with the path where you want to store the file
-#     current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-#     file_name = f'{ticker_symbol}_{current_time}.csv'
-#     blob_path = f'raw/{ticker_symbol}/{file_name}'
-#     export_blob = export_bucket.blob(blob_path)
-    
-#     # convert dataframe to csv and upload to gcs
-#     csv_data = df.to_csv(index=True)
-#     export_blob.upload_from_string(csv_data, content_type='text/csv')
-#     # log.info(f'File {file_name} uploaded to {blob_path} in bucket {os.getenv("BUCKET_NAME")}')
-#     return blob_path
-
-# if __name__ == "__main__":
-#     # for ticker in US_tickers:
-#     #     df= load_data(ticker, period='3y', interval='1d')
-#     #     blob_path = upload_to_gcs(df, ticker)
-#     #     time.sleep(10)  # to avoid hitting API rate limits
-#     indian_tickers = ['TATAMOTORS.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS']
-
-#     for ticker in indian_tickers:
-#         df= load_and_process_raw_data(ticker, period='3y', interval='1d')
-#         blob_path = upload_to_gcs(df, ticker)
-#         time.sleep(10)  # to avoid hitting API rate limits
-#     # log.info("Data ingestion completed successfully.")
-
-
-#============================================================================================
-
-# make a pipeline where data is getting loaded every month to the gcs bucket 
 class StockDataIngestionPipeline:
     def __init__(self, tickers = None):
 
@@ -318,3 +267,55 @@ def main():
     
 if __name__ == "__main__":
     main()
+
+
+# =========================================================================
+# #step 1: load the data into dataframe
+# US_tickers=  ['TSLA', 'META', 'NVDA', 'PLTR', 'INTC']
+# indian_tickers = ['TATAMOTORS.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS']
+
+
+
+# # step 2: upload the df into cloud storage service
+
+# load_dotenv()   
+
+# client = storage.Client()
+# export_bucket = client.get_bucket(os.getenv('BUCKET_NAME')) 
+
+# def load_and_process_raw_data(ticker_symbol, period, interval):
+#     df= yf.download(ticker_symbol, period=period, interval=interval)    
+#     df.columns = df.columns.get_level_values(0)
+#     df.reset_index(inplace=True)
+#     return df
+
+# def upload_to_gcs(df, ticker_symbol):
+#     # create a blob object with the path where you want to store the file
+#     current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+#     file_name = f'{ticker_symbol}_{current_time}.csv'
+#     blob_path = f'raw/{ticker_symbol}/{file_name}'
+#     export_blob = export_bucket.blob(blob_path)
+    
+#     # convert dataframe to csv and upload to gcs
+#     csv_data = df.to_csv(index=True)
+#     export_blob.upload_from_string(csv_data, content_type='text/csv')
+#     # log.info(f'File {file_name} uploaded to {blob_path} in bucket {os.getenv("BUCKET_NAME")}')
+#     return blob_path
+
+# if __name__ == "__main__":
+#     # for ticker in US_tickers:
+#     #     df= load_data(ticker, period='3y', interval='1d')
+#     #     blob_path = upload_to_gcs(df, ticker)
+#     #     time.sleep(10)  # to avoid hitting API rate limits
+#     indian_tickers = ['TATAMOTORS.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS']
+
+#     for ticker in indian_tickers:
+#         df= load_and_process_raw_data(ticker, period='3y', interval='1d')
+#         blob_path = upload_to_gcs(df, ticker)
+#         time.sleep(10)  # to avoid hitting API rate limits
+#     # log.info("Data ingestion completed successfully.")
+
+
+#============================================================================================
+
+# make a pipeline where data is getting loaded every month to the gcs bucket 
