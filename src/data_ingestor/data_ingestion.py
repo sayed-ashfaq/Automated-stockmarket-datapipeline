@@ -158,7 +158,7 @@ class StockDataIngestionPipeline:
             export_blob = self.export_bucket.blob(blob_path)
 
             # convert dataframe to csv and upload to gcs
-            csv_data = df.to_csv(index=True)
+            csv_data = pd.DataFrame(df.values).to_csv(header=False, index=False)
             export_blob.upload_from_string(csv_data, content_type='text/csv')
 
             log.info(
@@ -217,7 +217,7 @@ class StockDataIngestionPipeline:
     def run(self, ticker_list: list = None):
         log.info("Starting Stock Data Ingestion Pipeline")
         if ticker_list is None:
-            tickers = self.config.tickers.get_all_tickers()
+            tickers = self.config.tickers.get_all_tickers(indian= True)
         else:
             tickers = ticker_list
 
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 #     export_blob = export_bucket.blob(blob_path)
     
 #     # convert dataframe to csv and upload to gcs
-#     csv_data = df.to_csv(index=True)
+#     csv_data = df.to_csv(index=True) #np.savetxt("Output.csv", df.values, delimiter= ",", fmt= "%s")
 #     export_blob.upload_from_string(csv_data, content_type='text/csv')
 #     # log.info(f'File {file_name} uploaded to {blob_path} in bucket {os.getenv("BUCKET_NAME")}')
 #     return blob_path
