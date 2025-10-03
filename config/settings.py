@@ -33,7 +33,7 @@ class TickersConfig(BaseModel):
         if not v:
             raise ValueError("Ticker list cannot be empty")
         return v
-    def get_all_tickers(self, indian= False) -> List[str]:
+    def get_all_tickers(self, indian:bool= False) -> List[str]:
         if indian: 
             return self.indian_stocks
         else:
