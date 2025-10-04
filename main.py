@@ -5,8 +5,8 @@ def main():
     pipeline = StockDataIngestionPipeline()
     
     # Run for all configured tickers
-    # ticker = ['TCS.NS']
-    pipeline.run()
+    ticker_list = ['TATAMOTORS.NS']
+    pipeline.run(ticker_list= ticker_list)
 
 
 
